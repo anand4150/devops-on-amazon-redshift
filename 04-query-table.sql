@@ -1,0 +1,1 @@
+SELECT first_name, email FROM MOCK_DATA WHERE ip_address = '150.82.35.84'

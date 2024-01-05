@@ -1,0 +1,90 @@
+
+Source for repo:
+https://github.com/aws-solutions-library-samples/guidance-for-devops-on-amazon-redshift.git
+
+* Changes Made
+
+    - Inbound rules were not present for 8080
+    - Updates for region has been updated
+    - Tested with sql queries
+    - Added Redshift cluster for Terraform
+    - Added dockerignore
+    - Updated Dockerfile Ubuntu version from ubuntu:18.04 --> ubuntu:20.04
+    - Python is currently supported only for version3.6
+    - Python will echo arguments only, Added environment block in Jenkinsfile
+    - Moved command from variable to sh block
+    - Added commands for debugging
+    - Removed AWS related envars in Dockerfile
+    - Removed srcdir in Dockerfile
+
+#+BEGIN_SRC
+# Get a list of databases from aws cli
+aws redshift-data list-databases --cluster-identifier=tf-redshift-cluster --database=test_poc_1 --db-user=admin
+
+# Execute a batch statement
+aws redshift-data execute-statement --cluster-identifier=tf-redshift-cluster --database=test_poc_1 --db-user=admin \
+    --sql="CREATE TABLE MOCK_DATA (id INT, first_name VARCHAR(50), last_name VARCHAR(50), email VARCHAR(50), ip_address VARCHAR(20));" \
+    --output=json
+
+# Execute a sql statement from a file
+aws redshift-data execute-statement --cluster-identifier=tf-redshift-cluster --database=test_poc_1 --db-user=admin \
+    --sql= \
+    --output=json
+# Get the status of the query
+aws redshift-data describe-statement --id=f9ab0eea-af09-4606-9c48-c46270c6cfe4 --output=json
+252bd9fc-833e-4c64-902e-f807aab0c664
+# Return last 10 FINISHED Items
+aws redshift-data list-statements --output=json --status=FINISHED --max-items=10
+
+# Return last 10 FAILED statemets
+aws redshift-data list-statements --output=json --status=FAILED --max-items=10
+
+# Store responses in json file to query
+aws redshift-data list-statements --output=json --status=ALL --max-items=10 --no-cli-pager >output.json
+#+END_SRC
+
+    - Updated python fn *create_cluster_and_execute_query* to just print existing cluster properties
+    - Defined s3 cluster to save cursor?
+    - Commented user defined bucket
+    - SQL queries need to be single line as ini does not support multiline statements
+    - IAM roles, number of clusters used by create delete cluster operation only (DWH_IAM_ROLE_NAME, DWH_NUM_NODES)
+    - Removing getsecret in python client for now
+    - Added debug statements to src/RedshiftEphemeral.py, src/python_client_redshift_ephemeral.py
+    - Removed mannual addition of Dbname in RedshiftEphemeral
+    - Manually providing the value of db 'test_poc_1'
+    - reading the DBName from self not working for now
+    - The code does not work if the s3_bucket, pointer is not available
+    - Disabled manual sql queries.
+    - Enabled debugging of read_config_file_rollback
+
+    - If we keep the queries/ rollforward and rollback_sections together, the script cannot
+    differentiate between that is for rollforward and what is for rollback.
+    - We need to create a seperate ini file for rollback. It can have multiple sections
+    - Created a separate stage for rollback in jenkinsfile
+    - Removed rollback steps for queries
+    - For separate rollback file, currently 'ALL' is not supported. Mentioning a specific section in Jenkinsfile.
+
+    - Testing rollback with rollforward in Jenkins
+    - Dockerfile updates are finalized with tag **dockerfile_update.v1**.
+    Changes to python begin now.
+    - * Python formatting using linters black, isort and flake8, formatted python_client_redshift_ephemeral
+
+#+BEGIN_SRC
+    # Output for pip freeze
+    boto3==1.33.12
+    botocore==1.33.13
+    configparser==6.0.0
+    dataclasses==0.6
+    jmespath==1.0.1
+    numpy==1.24.4
+    pandas==2.0.3
+    python-dateutil==2.8.2
+    pytz==2023.3.post1
+    s3transfer==0.8.2
+    six==1.16.0
+    tzdata==2023.3
+    urllib3==1.26.18
+#+END_SRC
+    - Removed s3 related arguments in function,
+    - replaced  s3 bucket related code to file IO,
+    - Removed breakpoints for testing
