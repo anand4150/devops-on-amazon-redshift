@@ -1,0 +1,9 @@
+numpy==1.24.4                                                                                                                                                     
+pandas==2.0.3                                                                                                                                                     
+boto3==1.33.12                                                                                                                                                    
+configparser==6.0.0                                                                                                                                         
+dataclasses==0.6    
+# pandas==0.25.1
+# numpy==1.22.0
+# configparser==5.0.0
+# Cython==3.0.6                                                                                                                                                     
